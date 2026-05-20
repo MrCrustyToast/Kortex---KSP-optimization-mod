@@ -14,7 +14,7 @@ namespace CoreKinetics
         {
             if (string.IsNullOrEmpty(saveName) || string.IsNullOrEmpty(saveDir)) return true;
             
-            // Sécurité anti-spam
+            //anti-spam
             if (isSavingActive)
             {
                 ScreenMessages.PostScreenMessage("Kortex : Une sauvegarde est déjà en cours...", 2f, ScreenMessageStyle.UPPER_CENTER);
@@ -50,14 +50,14 @@ namespace CoreKinetics
                     try 
                     { 
                         rootNode.Save(path); 
-                        // On repasse sur le thread principal pour nettoyer le flag et notifier
+                        //maint thread flag and notif
                         MainThreadDispatcher.RunOnMainThread(() => {
                             isSavingActive = false;
                         });
                     }
                     catch (Exception e)
                     {
-                        // Si ça rate, on log proprement SANS bloquer le jeu
+                        //IF fails log without crashing KSP
                         MainThreadDispatcher.RunOnMainThread(() => {
                             Debug.LogError($"[Kortex] Échec de l'écriture asynchrone : {e.Message}");
                             ScreenMessages.PostScreenMessage("Erreur : Sauvegarde Kortex échouée.", 4f, ScreenMessageStyle.UPPER_CENTER);
@@ -66,12 +66,12 @@ namespace CoreKinetics
                     }
                 });
 
-                return false; // On court-circuite la sauvegarde native de KSP
+                return false; //Cut the native saves from KSP
             }
             catch 
             { 
                 isSavingActive = false;
-                return true; // En cas de gros bug, on laisse KSP sauvegarder normalement
+                return true; //If bugs too much let KSP manage it
             }
         }
     }
