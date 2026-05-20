@@ -5,14 +5,14 @@ using System.Collections.Concurrent;
 
 namespace CoreKinetics
 {
-    // 1. Dispatcher Thread Principal (Optimisé et sécurisé)
+    //Main thread dispatcher
     public static class MainThreadDispatcher
     {
         private static readonly ConcurrentQueue<Action> queue = new ConcurrentQueue<Action>();
         
         public static void Update() 
         { 
-            // On vide la queue rapidement sans allocation
+            //Quickly empties the queue
             while (queue.TryDequeue(out var action)) 
             {
                 if (action != null)
@@ -26,23 +26,23 @@ namespace CoreKinetics
         public static void RunOnMainThread(Action action) { queue.Enqueue(action); }
     }
 
-    // 2. Gestionnaire GC (Nettoyé des fonctions bloquantes)
+    //GC manager
     public class IncrementalGCManager : MonoBehaviour
     {
         void Awake() 
         { 
-            // On force l'Incremental GC d'Unity (Idéal pour lisser les pics de lag de KSP)
+            //Force Unity GC (Garbage Collector) , smoothes out frames
             if (UnityEngine.Scripting.GarbageCollector.GCMode != UnityEngine.Scripting.GarbageCollector.Mode.Enabled)
             {
                 UnityEngine.Scripting.GarbageCollector.GCMode = UnityEngine.Scripting.GarbageCollector.Mode.Enabled;
                 Debug.Log("[Kortex] Incremental GC activé de force pour fluidifier le framerate.");
             }
-            Destroy(this); // Plus besoin de tourner dans l'Update, on peut détruire ce composant !
+            Destroy(this); //once finish we can destroy it
         }
     }
 
-    // 3. Loader Global (Chargement UNIQUE au démarrage)
-    [KSPAddon(KSPAddon.Startup.Instantly, true)] // true = Persiste à travers toutes les scènes SANS re-patcher
+    //Global loader
+    [KSPAddon(KSPAddon.Startup.Instantly, true)] // true = Persists without re-patch
     public class CoreLoader : MonoBehaviour
     {
         private static bool hasInitialized = false;
@@ -50,7 +50,7 @@ namespace CoreKinetics
 
         void Awake()
         {
-            // Sécurité pour éviter les doubles instances au démarrage
+            //Double instances protection on startup
             if (hasInitialized)
             {
                 Destroy(gameObject);
@@ -81,7 +81,7 @@ namespace CoreKinetics
 
         void OnDestroy() 
         { 
-            // N'est appelé que si le jeu se ferme, ce qui est propre
+            //Only called when KSP closes
             if (harmony != null)
             {
                 harmony.UnpatchAll("com.corekinetics.global"); 
