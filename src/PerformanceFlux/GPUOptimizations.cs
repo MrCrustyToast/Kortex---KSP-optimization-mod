@@ -9,7 +9,7 @@ namespace PerformanceFlux
         private float stockShadowDist;
         private int stockShadowCascades;
 
-        // Cache pour stocker les MeshRenderers des pièces et éviter le GetComponentsInChildren
+        // cache for MeshRenderers and avoid GetComponentsInChildren
         private readonly Dictionary<Part, MeshRenderer[]> rendererCache = new Dictionary<Part, MeshRenderer[]>();
         private readonly List<Part> deadParts = new List<Part>(); // Liste tampon pour nettoyer le cache
 
@@ -35,13 +35,13 @@ namespace PerformanceFlux
             Vessel v = FlightGlobals.ActiveVessel;
             if (v != null && v.mainBody != null && v.altitude > (v.mainBody.atmosphereDepth + 15000))
             {
-                // En orbite ou haute atmosphère, on réduit drastiquement les ombres globales
+                // In high altitude the shadows are drastically reduced
                 QualitySettings.shadowDistance = 30f;
                 QualitySettings.shadowCascades = 2;
             }
             else
             {
-                // Retour aux paramètres d'origine du joueur
+                // Back to player's settings
                 QualitySettings.shadowDistance = stockShadowDist;
                 QualitySettings.shadowCascades = stockShadowCascades;
             }
@@ -53,7 +53,7 @@ namespace PerformanceFlux
             if (active == null || FlightGlobals.VesselsLoaded == null) return;
 
             Vector3 activePos = active.transform.position;
-            float maxDistSqr = 400f * 400f; // 400 mètres au carré pour s'affranchir de la racine carrée (Vector3.Distance)
+            float maxDistSqr = 400f * 400f; // 400 square meters to compensate the square root (Vector3.Distance)
 
             int loadedVesselCount = FlightGlobals.VesselsLoaded.Count;
             for (int i = 0; i < loadedVesselCount; i++)
@@ -61,7 +61,7 @@ namespace PerformanceFlux
                 Vessel v = FlightGlobals.VesselsLoaded[i];
                 if (v == null || v == active || v.parts == null) continue;
 
-                // Calcul ultra-rapide de la distance au carré
+                // Ultra fast equation for the square root
                 float sqrDist = (activePos - v.transform.position).sqrMagnitude;
                 bool isFar = sqrDist > maxDistSqr;
 
@@ -71,7 +71,7 @@ namespace PerformanceFlux
                     Part p = v.parts[j];
                     if (p == null) continue;
 
-                    // Récupération ou mise en cache des renderers (ZÉRO allocation après le premier passage)
+                    // Pick up or send to cache the renderer
                     if (!rendererCache.TryGetValue(p, out MeshRenderer[] renderers))
                     {
                         renderers = p.GetComponentsInChildren<MeshRenderer>();
@@ -80,7 +80,7 @@ namespace PerformanceFlux
 
                     if (renderers == null) continue;
 
-                    // Application du mode d'ombre
+                    // Shadow mode application
                     var targetMode = isFar ? UnityEngine.Rendering.ShadowCastingMode.Off : UnityEngine.Rendering.ShadowCastingMode.On;
                     for (int r = 0; r < renderers.Length; r++)
                     {
@@ -92,7 +92,7 @@ namespace PerformanceFlux
                 }
             }
 
-            // Nettoyage périodique du cache pour éviter de garder les pièces détruites en mémoire
+            // Cache cleaner to not keep destroyed part upkept
             CleanRendererCache();
         }
 
