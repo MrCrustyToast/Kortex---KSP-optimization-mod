@@ -17,7 +17,7 @@ namespace PerformanceFlux
         {
             float deltaTime = Time.unscaledDeltaTime;
 
-            // 1. Gestion du Throttle de l'UI (Toutes les 0.05s ~ 20 FPS pour l'UI, largement assez fluide)
+            //UI throttler
             uiTimer += deltaTime;
             if (uiTimer >= 0.05f)
             {
@@ -29,7 +29,7 @@ namespace PerformanceFlux
                 ShouldUpdateUI = false;
             }
 
-            // 2. Gestion du Throttle CommNet (Toutes les 0.2s ~ 5 fois par seconde)
+            //Commnet throttler
             commNetTimer += deltaTime;
             if (commNetTimer >= 0.2f)
             {
@@ -43,26 +43,26 @@ namespace PerformanceFlux
         }
     }
 
-    // Throttle UI Native (Ressources)
+    // Throttle UI Nativ (Ressources)
     [HarmonyPatch(typeof(ResourceDisplay), "UpdateDisplay")]
     public static class UIThrottlePatch
     {
         [HarmonyPrefix]
         public static bool Prefix() 
         { 
-            // Si le CPUManager n'est pas encore prêt, on laisse passer par sécurité
+            //IF CpuManager not ready it waits
             return CPUManager.ShouldUpdateUI; 
         }
     }
 
-    // Throttle CommNet Global (Gros gain CPU sur les réseaux de satellites)
+    // Throttle CommNet Global (Huge gains for satellites constellations)
     [HarmonyPatch(typeof(CommNet.CommNetNetwork), "Update")]
     public static class CommNetThrottle
     {
         [HarmonyPrefix]
         public static bool Prefix()
         {
-            // On utilise le flag centralisé et managé pour éviter les dérives de variables statiques
+            // Centralised Flag
             return CPUManager.ShouldUpdateCommNet;
         }
     }
