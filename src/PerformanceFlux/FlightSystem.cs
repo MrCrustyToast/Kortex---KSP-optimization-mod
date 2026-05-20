@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace PerformanceFlux
 {
-    // 1. Cache Global des Vaisseaux (Optimisé sans allocation GC)
+    //vessels global cache
     public static class VesselComponentCache
     {
         private static readonly Dictionary<(Guid, Type), List<PartModule>> cache = new Dictionary<(Guid, Type), List<PartModule>>();
@@ -18,13 +18,13 @@ namespace PerformanceFlux
             
             keysToRemove.Clear();
             
-            // Récupération des clés à détruire sans allouer de mémoire via foreach
+            //keeps keys without using the memory
             foreach (var k in cache.Keys) 
             {
                 if (k.Item1 == v.id) keysToRemove.Add(k);
             }
             
-            // Suppression sécurisée
+            // securised deletion
             for (int i = 0; i < keysToRemove.Count; i++)
             {
                 cache.Remove(keysToRemove[i]);
@@ -48,7 +48,7 @@ namespace PerformanceFlux
             var res = new List<PartModule>();
             int partCount = v.parts.Count;
             
-            // Remplacement des foreach par des boucles "for" indexées (plus rapides sur les listes Unity)
+            // Foreach >> for
             for (int i = 0; i < partCount; i++)
             {
                 var part = v.parts[i];
@@ -76,21 +76,21 @@ namespace PerformanceFlux
         public static bool Prefix(Vessel __instance, Type type, ref List<PartModule> __result)
         {
             __result = VesselComponentCache.Get(__instance, type);
-            return false; // On court-circuite la recherche native lourde de KSP
+            return false; //Dynamic search
         }
     }
 
-    // 2. Loader Vol (Allégé et synchronisé avec le Core)
+    // Lighter flight loader
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class FlightLoader : MonoBehaviour
     {
         void Awake()
         {
-            // Injecte proprement les gestionnaires de ressources CPU/GPU dans la scène de vol
+            // Ressources injecter
             gameObject.AddComponent<CPUManager>();
             gameObject.AddComponent<GPUManager>();
 
-            // Événements KSP pour l'actualisation dynamique du cache
+            // dynamic cache actualisation with KSP scene change
             GameEvents.onVesselWasModified.Add(VesselComponentCache.Invalidate);
             GameEvents.onVesselPartCountChanged.Add(VesselComponentCache.Invalidate);
             
@@ -99,7 +99,7 @@ namespace PerformanceFlux
 
         void OnDestroy()
         {
-            // Nettoyage strict pour éviter les fuites de pointeurs d'événements
+            // Leak patcher
             GameEvents.onVesselWasModified.Remove(VesselComponentCache.Invalidate);
             GameEvents.onVesselPartCountChanged.Remove(VesselComponentCache.Invalidate);
             VesselComponentCache.Clear();
