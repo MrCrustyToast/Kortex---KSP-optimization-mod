@@ -1,0 +1,9 @@
+C:\Users\matte\Downloads\Kortex\bin\Release\CoreKinetics.dll
+C:\Users\matte\Downloads\Kortex\bin\Release\CoreKinetics.pdb
+C:\Users\matte\Downloads\Kortex\obj\release\CoreKinetics.csproj.AssemblyReference.cache
+C:\Users\matte\Downloads\Kortex\obj\release\CoreKinetics.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\matte\Downloads\Kortex\obj\release\CoreKinetics.AssemblyInfoInputs.cache
+C:\Users\matte\Downloads\Kortex\obj\release\CoreKinetics.AssemblyInfo.cs
+C:\Users\matte\Downloads\Kortex\obj\release\CoreKinetics.csproj.CoreCompileInputs.cache
+C:\Users\matte\Downloads\Kortex\obj\release\CoreKinetics.dll
+C:\Users\matte\Downloads\Kortex\obj\release\CoreKinetics.pdb
